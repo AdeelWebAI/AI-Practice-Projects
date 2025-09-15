@@ -1,32 +1,27 @@
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
-from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
 from workflow import run_workflow
 import os
 
 app = FastAPI()
 
-# CORS for local development
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-class Question(BaseModel):
-    question: str
+# Serve static folder at /static instead of /
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
-async def root():
-    return FileResponse("static/index.html")
+async def serve_home():
+    return FileResponse(os.path.join("static", "index.html"))
 
 @app.post("/ask")
-async def ask_ai(payload: Question):
+async def ask_ai(request: Request):
     try:
-        answer = run_workflow(payload.question)
-        return {"answer": answer}
+        data = await request.json()
+        question = data.get("question", "")
+        result = await run_workflow(question)
+        return {"answer": result["answer"]}
     except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
+        return JSONResponse(
+            content={"error": str(e)},
+            status_code=500
+        )
