@@ -1,21 +1,12 @@
-import { useEffect, useState } from "react";
+import Agent from "./components/Agent";
 
-function App() {
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    fetch("http://localhost:8000/hello")
-      .then(res => res.json())
-      .then(data => setMessage(data.msg))
-      .catch(err => console.error(err));
-  }, []);
-
+export default function App() {
   return (
-    <div style={{textAlign:"center", marginTop:"50px"}}>
-      <h1>React + FastAPI</h1>
-      <p>{message}</p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">
+        Weather Checker App
+      </h1>
+      <Agent />
     </div>
   );
 }
-
-export default App;
